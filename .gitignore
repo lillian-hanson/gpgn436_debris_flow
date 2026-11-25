@@ -1,0 +1,5 @@
+__pycache__/
+.ipynb_checkpoints/
+_site/
+# local preview config with a machine-specific Python path
+.claude/launch.json
