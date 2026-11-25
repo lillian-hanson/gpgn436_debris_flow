@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debris-Flow Runout Explorer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Debris-Flow Runout Explorer</h1>
+  <p class="sub">1D depth-averaged flow with Coulomb/Voellmy friction, solved in your browser
+    (Python + NumPy via Pyodide). A tool for building intuition about what controls runout.
+    <strong>Not a hazard-prediction tool.</strong></p>
+</header>
+
+<main>
+  <section class="panel controls" aria-label="Inputs">
+    <h2>Inputs</h2>
+    <label>Release volume V <output id="volume-out"></output>
+      <input id="volume" type="range" min="1000" max="30000" step="500" value="10000"></label>
+    <label>Channel width b <output id="width-out"></output>
+      <input id="width" type="range" min="5" max="50" step="1" value="20"></label>
+    <label>Upper-reach slope θ₁ <output id="theta1-out"></output>
+      <input id="theta1" type="range" min="15" max="45" step="1" value="30"></label>
+    <label>Friction angle φ <output id="phi-out"></output>
+      <input id="phi" type="range" min="6" max="40" step="0.5" value="20">
+      <small class="hint">Debris-flow guidance (RAMMS): <span class="nowrap">μ = tan φ = 0.05–0.4</span>, i.e. <span class="nowrap">φ ≈ 3°–22°</span>; above 0.4 is rarely useful.
+        Below 5° the flow cannot stop on the runout reach.</small></label>
+    <label>Turbulence coefficient ξ <output id="xi-out"></output>
+      <input id="xi" type="range" min="100" max="4000" step="50" value="500">
+      <small class="hint">Debris-flow guidance (RAMMS): 100–200 m/s² for granular (solid-dominated) flows,
+        200–1000 m/s² for muddy (fluid-like) flows.</small></label>
+    <p class="derived" id="release-info"></p>
+    <p class="fixed">Fixed: release depth h₀ = 3 m, runout reach 5° from s = 350 m,
+      domain 600 m, grid dx = 0.5 m, CFL 0.45.</p>
+    <button id="run" disabled>Loading…</button>
+    <p id="status" class="status" role="status">Starting Python…</p>
+  </section>
+
+  <section class="panel metrics" aria-label="Results">
+    <h2>Results</h2>
+    <div class="tiles">
+      <div class="tile"><span class="label">Runout (front position)</span><span class="value" id="m-runout">–</span></div>
+      <div class="tile"><span class="label">Peak front speed</span><span class="value" id="m-speed">–</span></div>
+      <div class="tile"><span class="label">Peak Froude number (flow body)</span><span class="value" id="m-froude">–</span></div>
+      <div class="tile"><span class="label">Max deposit thickness</span><span class="value" id="m-thick">–</span></div>
+      <div class="tile"><span class="label">Mass balance error</span><span class="value" id="m-mass">–</span></div>
+      <div class="tile"><span class="label">Simulated time / outflow</span><span class="value" id="m-time">–</span></div>
+    </div>
+  </section>
+
+  <section class="panel plots" aria-label="Plots">
+    <div class="timebar">
+      <label>Time <output id="time-out">0.0 s</output>
+        <input id="time" type="range" min="0" max="0" step="1" value="0" disabled></label>
+      <button id="play" disabled>Play</button>
+    </div>
+    <figure>
+      <figcaption>Side view: h(s, t) on the bed. Flow depth drawn at
+        <label class="inline"><input type="radio" name="exag" value="1"> 1×</label>
+        <label class="inline"><input type="radio" name="exag" value="5" checked> 5×</label>
+        vertical scale.</figcaption>
+      <canvas id="side"></canvas>
+    </figure>
+    <figure>
+      <figcaption>Overhead view: schematic only. The 1D solution is extruded across the channel width b;
+        lateral spreading and overbank flow are not modeled. Colour = depth.</figcaption>
+      <canvas id="overhead"></canvas>
+    </figure>
+    <figure>
+      <figcaption>Depth profile h(s) at the selected time (final = deposit). Vertical scale stretched
+        <span id="stretch">–</span> relative to horizontal: read depths here, not slopes or shape
+        (the side view at 1× shows the shape).</figcaption>
+      <canvas id="deposit"></canvas>
+    </figure>
+    <figure>
+      <figcaption>Front position vs. time (front: where h first drops below 1 cm)</figcaption>
+      <canvas id="front"></canvas>
+    </figure>
+  </section>
+
+  <section class="panel limits">
+    <h2>Model limits</h2>
+    <ul>
+      <li>Width-averaged 1D: no lateral spreading or overbank flow.</li>
+      <li>Constant effective friction: no pore-pressure evolution and no entrainment.</li>
+      <li>Single-phase mixture.</li>
+      <li>The flux-limited Lax-Wendroff scheme drops to first order at the front, so the front is smeared, and runout shifts by a few metres with grid and stopping rule.</li>
+      <li>φ and ξ trade off against each other, so matching one runout distance identifies neither.</li>
+      <li>The φ and ξ ranges under the sliders are suggestions from RAMMS, a model with yield-stress and terrain-curvature terms this one lacks. They are a guide, not calibrated values for this model, and flow type is not a material property.</li>
+      <li>The run stops when the front stops advancing; a thin film may still be draining down the upper reach.</li>
+    </ul>
+    <p>Verification against the Ritter and Stoker dam-break solutions and steady Voellmy flow:
+      see <code>verification/ritter_dam_break.ipynb</code> in the repository.</p>
+    <p class="fixed">Friction ranges: RAMMS::DEBRISFLOW User Manual v1.8.0 (RAMMS AG / WSL SLF, July 2024),
+      eq. 3.1 and §5.1, Table 5.3, p. 83. RAMMS writes the friction law as S = μN + ρgu²/ξ, the same
+      convention used here. The manual calls these values "only suggestions, not fixed definitions."</p>
+  </section>
+</main>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

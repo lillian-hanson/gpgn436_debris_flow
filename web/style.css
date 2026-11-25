@@ -1,0 +1,125 @@
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f2;
+  --surface-1: #fcfcfb;
+  --border: #dddcd7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #8a8984;
+  --grid: #e8e7e3;
+  --bed: #6b6a66;
+  --bed-fill: #e5e3dc;
+  --flow: #2a78d6;
+  --flow-fill: rgba(42, 120, 214, 0.35);
+  --accent: #eb6834;
+  --dry: #ecebe6;
+  --warn: #b25e00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --border: #34332f;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e86;
+    --grid: #2a2a27;
+    --bed: #a3a29a;
+    --bed-fill: #2b2a27;
+    --flow: #3987e5;
+    --flow-fill: rgba(57, 135, 229, 0.4);
+    --accent: #d95926;
+    --dry: #262624;
+    --warn: #e2a24c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --border: #34332f;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8f8e86;
+  --grid: #2a2a27;
+  --bed: #a3a29a;
+  --bed-fill: #2b2a27;
+  --flow: #3987e5;
+  --flow-fill: rgba(57, 135, 229, 0.4);
+  --accent: #d95926;
+  --dry: #262624;
+  --warn: #e2a24c;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0 16px 32px;
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+header { max-width: 1280px; margin: 0 auto; padding: 20px 0 8px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 15px; margin: 0 0 12px; }
+.sub { margin: 0; color: var(--text-secondary); max-width: 900px; }
+
+main {
+  max-width: 1280px; margin: 0 auto;
+  display: grid; gap: 16px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-areas: "controls plots" "metrics plots" "limits limits";
+  align-items: start;
+}
+.controls { grid-area: controls; }
+.metrics { grid-area: metrics; }
+.plots { grid-area: plots; }
+.limits { grid-area: limits; }
+@media (max-width: 860px) {
+  main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "controls" "metrics" "plots" "limits"; }
+}
+
+.panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+
+label { display: block; margin-bottom: 12px; color: var(--text-secondary); }
+label output { float: right; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; margin-top: 4px; accent-color: var(--flow); }
+.nowrap { white-space: nowrap; }
+label.inline { display: inline; margin: 0 4px 0 0; color: var(--text-primary); }
+.hint { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--text-muted); }
+.derived { margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+.derived.warn { color: var(--warn); font-weight: 600; }
+.fixed { color: var(--text-muted); font-size: 12px; }
+button {
+  font: inherit; font-weight: 600; padding: 8px 18px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--flow); background: var(--flow); color: #fff;
+}
+button:disabled { opacity: 0.5; cursor: default; }
+#play { background: transparent; color: var(--flow); }
+.status { color: var(--text-secondary); min-height: 1.4em; }
+.status.error { color: var(--warn); }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.tile .label { display: block; font-size: 12px; color: var(--text-secondary); }
+.tile .value { display: block; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.timebar { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+.timebar label { flex: 1 1 240px; margin: 0; }
+figure { margin: 16px 0 0; min-width: 0; }
+figcaption { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+canvas { display: block; width: 100%; }
+#side { height: 280px; }
+#overhead { height: 90px; }
+#deposit, #front { height: 220px; }
+
+.limits ul { margin: 0 0 8px; padding-left: 20px; color: var(--text-secondary); }
+code { font-size: 12px; }
+
+.tooltip {
+  position: fixed; pointer-events: none; z-index: 10;
+  background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
+  font-size: 12px; font-variant-numeric: tabular-nums; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
